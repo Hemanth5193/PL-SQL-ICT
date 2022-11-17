@@ -1,0 +1,108 @@
+create table PART (
+    PART_NO number not null,
+    PART_NAME varchar2(20) not null,
+    IN_STOCK number not null,
+    PART_PRICE number not null,
+    PART_DESC varchar2(50) not null
+);
+/
+
+SELECT* FROM PART;
+
+**********************************************************************************************************************
+QUESTION NO.1
+
+CREATE OR REPLACE PROCEDURE PDETAILS(
+P_PART_NO NUMBER,
+P_PART_NAME OUT VARCHAR2,
+P_IN_STOCK OUT NUMBER,
+P_PART_PRICE OUT NUMBER,
+P_PART_DESC OUT VARCHAR2)
+IS
+BEGIN
+SELECT PART_NAME,IN_STOCK,PART_PRICE,PART_DESC INTO P_PART_NAME,P_IN_STOCK,P_PART_PRICE,P_PART_DESC
+FROM PART
+WHERE PART_NO = P_PART_NO;
+END;
+
+DECLARE
+ PART_NAME VARCHAR2(20);
+ IN_STOCK NUMBER;
+ PART_PRICE NUMBER;
+ PART_DESC VARCHAR2(50);
+BEGIN
+PDETAILS(111,PART_NAME,IN_STOCK,PART_PRICE,PART_DESC);
+DBMS_OUTPUT.PUT_LINE('REMANING DETAIS ARE SELECTED PART NUMBER:' );
+DBMS_OUTPUT.PUT_LINE('NAME = ' ||PART_NAME||'   STOCKS = ' ||IN_STOCK||'   PRICE = '||PART_PRICE||'   DESCRIPTION = '|| PART_DESC);
+END;
+
+**********************************************************************************************************************
+QUESTION NO.2
+
+
+CREATE TABLE BACK_UP (
+    date_modified date,
+    tran_user varchar2(16),
+    tran_name varchar2(6),
+    PART_NO number,
+    PART_NAME varchar2(20),
+    IN_STOCK number,
+    PART_PRICE number,
+    PART_DESC varchar2(50)
+);
+/
+
+create or replace trigger biu_part
+AFTER insert or delete or update on PART
+for each row
+declare
+    tran_name varchar2(20);
+begin
+    if inserting then
+    tran_name:='Insert';
+    elsif deleting then 
+    tran_name:='Delete';
+    else 
+    tran_name:='Update';
+    END IF;
+    if inserting then
+    insert into BACK_UP values (sysdate,user,tran_name, :new.PART_NO, :NEW.PART_NAME, :NEW.IN_STOCK, :NEW.PART_PRICE, :NEW.PART_DESC);
+    else 
+    insert into BACK_UP values (sysdate,user,tran_name, :OLD.PART_NO, :OLD.PART_NAME, :OLD.IN_STOCK, :OLD.PART_PRICE, :OLD.PART_DESC);
+    END IF;
+end;
+/
+
+INSERT INTO PART VALUES(111,'HHH',15,150,'USED FOR HHH');
+INSERT INTO PART VALUES(222,'NNN',14,130,'USED FOR NNN');
+INSERT INTO PART VALUES(333,'AAA',25,300,'USED FOR AAA');
+INSERT INTO PART VALUES(444,'RRR',20,400,'USED FOR RRR');
+
+SELECT * FROM BACK_UP;
+
+********************************************************************************************************************************
+QUESTION NO.3
+
+
+BEGIN
+UPDATE PART SET PART_PRICE=250 WHERE IN_STOCK < 16;
+END;
+SELECT * FROM PART;
+
+*********************************************************************************************************************************
+QUESTION NO.4
+
+
+ BEGIN
+ DBMS_OUTPUT.PUT_LINE('ALL THE DETAILS OF PART TABLE ARE:');
+ FOR a IN (SELECT * FROM PART)
+ LOOP
+ DBMS_OUTPUT.PUT_LINE('NUMBER =' || a.PART_NO || '    NAME = ' || a.PART_NAME || '   STOCK =' || a.IN_STOCK || '  PRICE = ' || a.PART_PRICE || '   DESCRIPTION = '||a.PART_DESC);
+ END LOOP;
+ END;
+
+
+**********************************************************************************************************************************
+
+
+
